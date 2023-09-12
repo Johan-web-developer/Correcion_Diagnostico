@@ -1,19 +1,14 @@
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 
-const uri = "mongodb+srv://user:12345@farmacia.xoypicz.mongodb.net/";
-const client = new MongoClient(uri, { useNewUrlParser: true });
+async function connectDB() {
+  try {
+    const client = await MongoClient.connect('mongodb+srv://user:12345@farmacia.xoypicz.mongodb.net/');
+    const db = client.db('farmaciaCampus');
+    return db;
+  } catch (error) {
+    console.error('Error connecting to database:', error);
+    throw error;
+  }
+}
 
-client.connect(err => {
-  const collection = client.db("farmaciaCampus").collection("pacientes");
-
-  // Realizar una consulta
-  collection.find({ name: "John Doe" }).toArray((err, docs) => {
-    if (err) throw err;
-
-    console.log("Resultados de la consulta:");
-    console.log(docs);
-
-    // Cerrar la conexión
-    client.close();
-  });
-});
+module.exports = { connectDB };

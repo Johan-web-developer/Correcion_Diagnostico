@@ -1,27 +1,21 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const { connectDB } = require('../database/config.js');
 
 class Server {
     constructor() {
         this.app = express();
         this.middleware();
         this.port = process.env.PORT
-        this.medicamentos = "/api/medicamentos";
-        this.proveedores = "/api/proveedores";  
-        this.empleados = "/api/empleados";
-        this.pacientes = "/api/pacientes";
-        this.compras = "/api/compras"
 
-        this.conectDB();
+        this.connectDB();
 
         this.routes();
     }
     
-    async conectDB() {
+    async connectDB() {
         try {
-            const client = await MongoClient.connect('mongodb+srv://user:12345@farmacia.xoypicz.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true });
-            this.db = client.db('farmaciaCampus');
+            this.db = await connectDB();
             console.log('Connected to database');
         } catch (error) {
             console.error('Error connecting to database:', error);
@@ -36,11 +30,7 @@ class Server {
     }
     
     routes() {
-        this.app.use(this.medicamentos, require('../routes/medicamentos.routes.js')(this.db));
-        this.app.use(this.proveedores, require('../routes/proveedores.routes.js')(this.db));
-        this.app.use(this.empleados, require('../routes/empleados.routes.js')(this.db));
-        this.app.use(this.pacientes, require('../routes/pacientes.routes.js')(this.db));
-        this.app.use(this.compras, require('../routes/compras.routes.js')(this.db));
+        this.app.use('/api/medicamentos', require('../routes/medicamentos.routes')(this.db));
     }
 
     listen() {

@@ -1,12 +1,8 @@
-module.exports = (db) => {
-    const express = require('express');
-    const router = express.Router();
+const express = require('express');
+const router = express.Router();
+const medicamentosController = require('../controllers/medicamentos.controller');
 
-    router.get('/', async (req, res) => {
-        const collection = db.collection('medicamentos');
-        const results = await collection.find({}).toArray();
-        res.json(results);
-    });
+// Define las rutas para los medicamentos aquí
+router.get('/', medicamentosController.getMedicamentosMenosDe50Stock);
 
-    return router;
-};
+module.exports = router;

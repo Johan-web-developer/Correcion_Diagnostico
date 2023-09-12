@@ -1,14 +1,21 @@
-const Medicamentos = require('../models/Medicamentos.js');
+// Asegúrate de que la importación de 'db' sea correcta
+const { db } = require('../database/config.js');
+const { MongoClient } = require('mongodb');
 
-const getMedicamentos = async (req,res)=>{
+client = new MongoClient(dbConfig.mongoURL)
+
+const getMedicamentosMenosDe50Stock = async (req, res) => {
     try {
-        const medicamentos = await Medicamentos.find();
-        const datafilter = medicamentos.filter((medicamentos)=>medicamentos.stock < 50);
-        res.json(datafilter)
+        // Asegúrate de que el nombre de la colección sea correcto ('medicamentos')
+        const collection = db.collection('Medicamentos');
+        const medicamentos = await collection.find({ stock: { $lt: 50 } }).toArray();
+        res.json(medicamentos);
     } catch (error) {
-        res.status(404).send(error);
-    }   
-}
+        console.error(error);
+        res.status(500).json({ message: 'Error en el servidor' });
+    }
+};
 
-module.exports = 
-getMedicamentos
+module.exports = {
+    getMedicamentosMenosDe50Stock
+};
