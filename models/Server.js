@@ -1,36 +1,42 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
-const { connectDB } = require('../database/config.js');
+const { MongoClient } = require('mongodb');
+const medicamentosRoutes = require('../routes/medicamentos.routes');
 
 class Server {
     constructor() {
         this.app = express();
         this.middleware();
-        this.port = process.env.PORT
+        this.port = process.env.PORT;
 
         this.connectDB();
 
         this.routes();
     }
-    
+
     async connectDB() {
-        try {
-            this.db = await connectDB();
-            console.log('Connected to database');
-        } catch (error) {
-            console.error('Error connecting to database:', error);
-        }
+            let db;
+            const url = 'mongodb+srv://user:12345@farmacia.xoypicz.mongodb.net/';
+            const client = new MongoClient(url);
+            const dbName = "farmaciaCampus";
+            // Conexion
+            client.connect().then(() => {
+                db = client.db(dbName);
+                console.log("Conectado a la base de datos");
+            }).catch(error => {
+                console.error("Error conectando a la base de datos:", error);
+            });
+            
     }
-    
+
     middleware() {
-        // CORS 
         this.app.use(cors());
-        // Leer y parsear JSON en BODY
         this.app.use(express.json());
     }
-    
+
     routes() {
-        this.app.use('/api/medicamentos', require('../routes/medicamentos.routes')(this.db));
+        this.app.use('/api/medicamentos', medicamentosRoutes);
     }
 
     listen() {

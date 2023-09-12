@@ -1,8 +1,8 @@
+// routes/medicamentos.js
 const express = require('express');
 const router = express.Router();
-const medicamentosController = require('../controllers/medicamentos.controller');
+const medicamentosController = require('../controllers/medicamentos.controller.js');
 
-// Define las rutas para los medicamentos aquí
-router.get('/', medicamentosController.getMedicamentosMenosDe50Stock);
+router.get('/stock-50', medicamentosController.getMedicamentosMenosDe50Stock);
 
 module.exports = router;
