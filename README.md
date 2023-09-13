@@ -13,11 +13,6 @@ FarmaciaCampus es un sistema de gestión de farmacia diseñado para ayudar en la
 - **Gestión de Proveedores:** Administra la información de los proveedores de medicamentos, incluyendo nombre, contacto y productos suministrados.
 - **Registro de Empleados:** Permite agregar y gestionar la información de los empleados de la farmacia, incluyendo nombre, cargo y contacto.
 
-## Capturas de Pantalla
-
-![Captura de Pantalla 1](ruta/a/tu/captura1.png)
-![Captura de Pantalla 2](ruta/a/tu/captura2.png)
-![Captura de Pantalla 3](ruta/a/tu/captura3.png)
 
 ## Instalación
 
