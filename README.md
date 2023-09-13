@@ -29,3 +29,10 @@ Sigue estos pasos para instalar y configurar FarmaciaCampus en tu sistema:
 2. **Clonar el Repositorio:**
    ```bash
    git clone https://github.com/Johan-web-developer/Correcion_Diagnostico.git
+## Instalación de Dependencias
+
+Sigue estos pasos para instalar las dependencias necesarias:
+
+```bash
+cd farmacia-campus
+npm install
