@@ -1,6 +1,8 @@
-module.exports = (db) => {
-    const express = require('express');
-    const router = express.Router();
+const { MongoClient } = require('mongodb');
+const express = require('express');
+const router = express.Router();
+const bases = process.env.DBBD;
+require('dotenv').config()
 
     router.get('/', async (req, res) => {
         const collection = db.collection('compras');
@@ -8,5 +10,5 @@ module.exports = (db) => {
         res.json(results);
     });
 
-    return router;
-};
+
+    module.exports = router;
