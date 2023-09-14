@@ -269,4 +269,24 @@ router.get('/medicamentos_expiran_2024', async (req, res) => {
     }
 });
 
+router.get('/medicamentos_no_vendidos', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const medicamentosCollection = db.collection('Medicamentos');
+        const ventasCollection = db.collection('Ventas');
+
+        const medicamentosVendidos = await ventasCollection.distinct('medicamentosVendidos.nombreMedicamento');
+        const medicamentosNoVendidos = await medicamentosCollection.find({
+            nombre: { $nin: medicamentosVendidos }
+        }).toArray();
+
+        res.json(medicamentosNoVendidos);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
