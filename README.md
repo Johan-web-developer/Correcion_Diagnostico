@@ -1,7 +1,7 @@
 # FarmaciaCampus - Sistema de Gestión de Farmacia
 
-![FarmaciaCampus Logo](![farmacia](./assets/farmacia.jpeg)
-)
+![FarmaciaCampus Logo](./assets/farmacia.jpeg)
+
 
 ## Descripción
 
