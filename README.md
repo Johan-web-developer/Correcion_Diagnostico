@@ -1,6 +1,6 @@
 # FarmaciaCampus - Sistema de Gestión de Farmacia
 
-![FarmaciaCampus Logo](![farmacia](https://github.com/Johan-web-developer/Correcion_Diagnostico/assets/131258981/173a764f-8cca-467d-99b5-6d1b84142e69)
+![FarmaciaCampus Logo](![farmacia](./assets/farmacia.jpeg)
 )
 
 ## Descripción
