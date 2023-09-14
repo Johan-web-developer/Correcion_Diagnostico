@@ -289,4 +289,174 @@ router.get('/medicamentos_no_vendidos', async (req, res) => {
     }
 });
 
+router.get('/total_medicamentos_vendidos_por_mes_2023', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const ventasCollection = db.collection('Ventas');
+
+        const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+        const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+
+        const totalMedicamentosPorMes = await ventasCollection.aggregate([
+            {
+                $match: {
+                    "fechaVenta": {
+                        $gte: inicio2023,
+                        $lte: fin2023
+                    }
+                }
+            },
+            {
+                $project: {
+                    mes: { $month: "$fechaVenta" },
+                    cantidadVendida: { $sum: "$medicamentosVendidos.cantidadVendida" }
+                }
+            },
+            {
+                $group: {
+                    _id: "$mes",
+                    total: { $sum: "$cantidadVendida" }
+                }
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]).toArray();
+
+        res.json(totalMedicamentosPorMes);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/medicamentos_vendidos_por_mes_2023', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const ventasCollection = db.collection('Ventas');
+
+        const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+        const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+
+        const medicamentosVendidosPorMes = await ventasCollection.aggregate([
+            {
+                $match: {
+                    "fechaVenta": {
+                        $gte: inicio2023,
+                        $lte: fin2023
+                    }
+                }
+            },
+            {
+                $unwind: "$medicamentosVendidos"
+            },
+            {
+                $group: {
+                    _id: {
+                        mes: { $month: "$fechaVenta" },
+                        nombreMedicamento: "$medicamentosVendidos.nombreMedicamento"
+                    },
+                    totalVendido: { $sum: "$medicamentosVendidos.cantidadVendida" }
+                }
+            },
+            {
+                $sort: { "_id.mes": 1, totalVendido: -1 }
+            }
+        ]).toArray();
+
+        res.json(medicamentosVendidosPorMes);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/medicamentos_no_vendidos_2023', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const medicamentosCollection = db.collection('Medicamentos');
+        const ventasCollection = db.collection('Ventas');
+
+        const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+        const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+
+        const medicamentosVendidos2023 = await ventasCollection.distinct('medicamentosVendidos.nombreMedicamento', {
+            "fechaVenta": {
+                $gte: inicio2023,
+                $lte: fin2023
+            }
+        });
+
+        const medicamentosNoVendidos2023 = await medicamentosCollection.find({
+            "nombreMedicamento": { $nin: medicamentosVendidos2023 }
+        }).toArray();
+
+        res.json(medicamentosNoVendidos2023);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/total_medicamentos_primer_trimestre_2023', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const ventasCollection = db.collection('Ventas');
+
+        const inicioPrimerTrimestre = new Date('2023-01-01T00:00:00.000Z');
+        const finPrimerTrimestre = new Date('2023-03-31T23:59:59.999Z');
+
+        const totalMedicamentosPrimerTrimestre = await ventasCollection.aggregate([
+            {
+                $match: {
+                    "fechaVenta": {
+                        $gte: inicioPrimerTrimestre,
+                        $lte: finPrimerTrimestre
+                    }
+                }
+            },
+            {
+                $unwind: "$medicamentosVendidos"
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalVendido: { $sum: "$medicamentosVendidos.cantidadVendida" }
+                }
+            }
+        ]).toArray();
+
+        res.json(totalMedicamentosPrimerTrimestre[0].totalVendido);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/medicamentos_precio_mayor_50_stock_menor_100', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const medicamentosCollection = db.collection('Medicamentos');
+
+        const medicamentosFiltrados = await medicamentosCollection.find({
+            "precio": { $gt: 50 },
+            "stock": { $lt: 100 }
+        }).toArray();
+
+        res.json(medicamentosFiltrados);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 module.exports = router;

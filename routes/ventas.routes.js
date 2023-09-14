@@ -89,4 +89,37 @@ router.get('/ventas_por_empleado', async (req, res) => {
     }
 });
 
+router.get('/total_gastado_por_paciente_2023', async (req, res) => {
+    try {
+        const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+        await client.connect();
+        const db = client.db('farmaciaCampus');
+        const ventasCollection = db.collection('Ventas');
+
+        const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+        const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+
+        const totalGastadoPorPaciente = await ventasCollection.aggregate([
+            {
+                $match: {
+                    "fechaVenta": {
+                        $gte: inicio2023,
+                        $lte: fin2023
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$paciente.nombre",
+                    totalGastado: { $sum: { $sum: "$medicamentosVendidos.precio" } }
+                }
+            }
+        ]).toArray();
+
+        res.json(totalGastadoPorPaciente);
+        client.close();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 module.exports = router;

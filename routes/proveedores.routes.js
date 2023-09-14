@@ -142,5 +142,134 @@ require('dotenv').config()
         }
     });
 
+    router.get('/proveedor_mas_suministros', async (req, res) => {
+        try {
+            const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+            await client.connect();
+            const db = client.db('farmaciaCampus');
+            const medicamentosCollection = db.collection('Medicamentos');
+    
+            const proveedorConMasSuministros = await medicamentosCollection.aggregate([
+                {
+                    $sort: { stock: -1 }
+                },
+                {
+                    $limit: 1
+                },
+                {
+                    $project: {
+                        proveedor: 1
+                    }
+                }
+            ]).toArray();
+    
+            res.json(proveedorConMasSuministros[0]);
+            client.close();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+    
+    router.get('/numero_proveedores_suministraron_2023', async (req, res) => {
+        try {
+            const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+            await client.connect();
+            const db = client.db('farmaciaCampus');
+            const medicamentosCollection = db.collection('Medicamentos');
+    
+            const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+            const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+    
+            const numeroProveedoresSuministraron2023 = await medicamentosCollection.distinct('proveedor.nombre', {
+                "medicamentos.fechaExpiracion": {
+                    $gte: inicio2023,
+                    $lte: fin2023
+                }
+            });
+    
+            const totalProveedores = numeroProveedoresSuministraron2023.length;
+    
+            res.json({ totalProveedores });
+            client.close();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    router.get('/proveedores_menos_de_50_unidades_en_stock', async (req, res) => {
+        try {
+            const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+            await client.connect();
+            const db = client.db('farmaciaCampus');
+            const medicamentosCollection = db.collection('Medicamentos');
+    
+            const proveedoresMenosDe50Unidades = await medicamentosCollection.aggregate([
+                {
+                    $match: {
+                        stock: { $lt: 50 }
+                    }
+                },
+                {
+                    $unwind: "$proveedor"
+                },
+                {
+                    $group: {
+                        _id: "$proveedor.nombre"
+                    }
+                }
+            ]).toArray();
+    
+            res.json(proveedoresMenosDe50Unidades);
+            client.close();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    router.get('/proveedores_con_5_medicamentos_diferentes_2023', async (req, res) => {
+        try {
+            const client = new MongoClient(bases, { useNewUrlParser: true, useUnifiedTopology: true });
+            await client.connect();
+            const db = client.db('farmaciaCampus');
+            const medicamentosCollection = db.collection('Medicamentos');
+    
+            const inicio2023 = new Date('2023-01-01T00:00:00.000Z');
+            const fin2023 = new Date('2023-12-31T23:59:59.999Z');
+    
+            const proveedoresCon5MedicamentosDiferentes = await medicamentosCollection.aggregate([
+                {
+                    $match: {
+                        "proveedor.fechaSuministro": {
+                            $gte: inicio2023,
+                            $lte: fin2023
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$proveedor.nombre",
+                        medicamentosDiferentes: { $addToSet: "$nombreMedicamento" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        cantidadMedicamentos: { $size: "$medicamentosDiferentes" }
+                    }
+                },
+                {
+                    $match: {
+                        cantidadMedicamentos: { $gte: 5 }
+                    }
+                }
+            ]).toArray();
+    
+            res.json(proveedoresCon5MedicamentosDiferentes);
+            client.close();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+    
 module.exports = router;
 
