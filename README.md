@@ -33,7 +33,8 @@ Sigue estos pasos para instalar las dependencias necesarias:
 cd farmacia-campus
 npm install
 ////
-
+```
 
 ## Inicializacion de proyecto rapida
+
 Aqui https://github.com/JuanJoseDuranRinconCAMPUS2/Inicializador-y-instalador-de-dependencias-AUTOMATICO-NODE.git
